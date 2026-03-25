@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VÖRNTEC — Caso de Estudio Técnico</title>
-  <meta name="description" content="Detección Temprana de Fugas de Gas mediante IA en Operación Offshore — VÖRNTEC Technical Case Study"/>
+  <title>VÖRNTEC — Technical Case Study</title>
+  <meta name="description" content="Early Gas Leak Detection via AI in Offshore Operations — VÖRNTEC Technical Case Study"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
@@ -14,7 +14,6 @@
     html{scroll-behavior:smooth}
     ::selection{background:rgba(0,200,83,0.19);color:#eef0f4}
 
-    /* Responsive overrides */
     @media(max-width:768px){
       .g2{grid-template-columns:1fr !important}
       .g3{grid-template-columns:1fr !important}
@@ -36,6 +35,20 @@
       .gpage{padding:32px 12px !important}
       .gh1{font-size:24px !important}
     }
+
+    .lang-toggle {
+      display:flex; align-items:center; gap:0;
+      border:1px solid #1e1e2a; border-radius:4px; overflow:hidden;
+    }
+    .lang-btn {
+      padding:4px 10px; font-size:10px; font-weight:700;
+      font-family:'JetBrains Mono','Fira Code','Consolas',monospace;
+      letter-spacing:.08em; cursor:pointer; border:none;
+      transition:background .2s, color .2s;
+    }
+    .lang-btn.active { background:#00c853; color:#07070b; }
+    .lang-btn.inactive { background:transparent; color:#6e6e8e; }
+    .lang-btn.inactive:hover { background:#1e1e2a; color:#9a9ab8; }
   </style>
 </head>
 <body>
@@ -44,9 +57,302 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="text/babel">
-const { useState, useEffect, useRef } = React;
+const { useState, useEffect, useRef, createContext, useContext } = React;
 
+// ── Language context ──────────────────────────────────────────────────────────
+const LangCtx = createContext("es");
+const useLang = () => useContext(LangCtx);
 
+// ── All translatable strings ──────────────────────────────────────────────────
+const T = {
+  es: {
+    // header / meta
+    headerSub: "Caso de Estudio Técnico",
+    confidential: "CONFIDENCIAL",
+    // cover
+    cover_label: "Caso de Estudio Técnico",
+    cover_h1_1: "Detección Temprana de",
+    cover_h1_2: "Fugas de Gas mediante IA",
+    cover_h1_3: "en Operación Offshore",
+    cover_body: "Validación técnica del pipeline de detección de VÖRNTEC aplicado a telemetría SCADA real del Dataset 3W de Petrobras — 32.8M de observaciones, 24 canales de sensores, 9 tipos de fallas confirmadas.",
+    inputs: "INPUTS",
+    outputs: "OUTPUTS",
+    kv_telemetry: "Telemetría SCADA", kv_telemetry_v: "32,872,250 observaciones",
+    kv_channels: "Canales de sensores", kv_channels_v: "24 señales",
+    kv_signal: "Tipos de señal", kv_signal_v: "Presión / Temp / Caudal",
+    kv_classes: "Clases de fallas etiquetadas", kv_classes_v: "9 tipos",
+    out_metric1: "$8M/año", out_label1: "Valor de producción recuperada",
+    out_metric2_suffix: "t CH₄", out_label2: "Emisiones de metano evitadas por año",
+    ben1_title: "Eficiencia Operacional", ben1_desc: "Detección proactiva de fallas que causan pérdidas de producción no visibles para los sistemas de alarma convencionales.",
+    ben2_title: "Seguridad", ben2_desc: "Identificación temprana de condiciones de riesgo como cierres espurios de DHSV y slugging severo antes de que escalen.",
+    ben3_title: "Impacto Ambiental", ben3_desc: "Reducción de emisiones de metano mediante detección anticipada de fugas de gas y bloqueos que requieren blowdown.",
+    cover_footer: "vorntec.com\nConfidencial — uso exclusivo para inversores y clientes",
+    pf1: "Resumen Ejecutivo",
+    // s2
+    s2_title: "El Dataset", s2_sub: "Origen, composición y credibilidad",
+    s2_origin_title: "Origen: Dataset 3W — Petrobras",
+    s2_origin_body: "El dataset proviene de telemetría SCADA real registrada en múltiples pozos offshore operados por una compañía de producción major. Los datos fueron capturados a intervalos de un minuto a través de 24 canales de sensores, abarcando operaciones normales y nueve categorías de fallas confirmadas. Los identificadores de pozos están completamente anonimizados.",
+    s2_disclaimer: "Datos de acceso público (3W Dataset v2.0.0, CC BY 4.0). No existe relación comercial ni contractual entre VÖRNTEC y Petrobras. Dataset utilizado exclusivamente como benchmark técnico.",
+    composicion: "COMPOSICIÓN",
+    kv_total: "Total de observaciones", kv_total_v: "32,872,250",
+    kv_normal: "Filas normales (Clase 0)", kv_normal_v: "12,158,183",
+    kv_anomal: "Filas anómalas (Clases 1–9)", kv_anomal_v: "20,714,067",
+    kv_canales: "Canales de sensores", kv_canales_v: "24",
+    kv_interval: "Intervalo de muestreo", kv_interval_v: "1 minuto",
+    kv_fallas_labeled: "Tipos de fallas etiquetadas", kv_fallas_labeled_v: "9",
+    kv_instances: "Instancias reales etiquetadas", kv_instances_v: "1,119",
+    kv_simulated: "Instancias simuladas", kv_simulated_v: "1,089 — excluidas",
+    hallazgo: "HALLAZGO CLAVE",
+    hallazgo_h: "El 63% del tiempo monitoreado corresponde a una condición de falla activa.",
+    hallazgo_body: "El análisis revela que la proporción de tiempo en estado anómalo supera ampliamente al tiempo en operación normal. Estas fallas se desarrollan de forma progresiva y sub-umbral, sin generar activaciones en los sistemas de alarma convencionales basados en umbrales fijos — lo que evidencia una limitación estructural en los esquemas de monitoreo tradicionales.",
+    dist_label: "Distribución por conteo de observaciones",
+    normal_label: "Operación Normal (Clase 0)", fault_label: "Todas las Fallas (1–9)",
+    imbalance_note_label: "Nota sobre desbalance de clases:", imbalance_note: "Ratio extremo — hasta 1:500 entre la clase más rara y la más frecuente. Abordado mediante conjuntos de evaluación balanceados. Entrenamiento con datos normales exclusivamente para la capa no supervisada.",
+    pf2: "Resumen del Dataset",
+    // s3
+    s3_title: "Tipos de Datos y Equipamiento", s3_sub: "Las 24 señales monitoreadas y su contexto físico",
+    pres_label: "Sensores de Proceso Físico",
+    pres_title: "PRESIÓN — 10 CANALES",
+    pres_items: [["P-PDG","Permanent Downhole Gauge"],["P-TPT","Tubing Pressure Transducer"],["P-MON-CKP","Upstream — choke de producción"],["P-JUS-CKP","Downstream — choke de producción"],["P-MON-CKGL","Upstream — choke de gas-lift"],["P-JUS-CKGL","Downstream — choke de gas-lift"],["P-ANULAR","Presión anular"],["P-MON-SDV-P","Upstream — SDV de producción"],["PT-P","Válvula wing de producción"],["P-JUS-BS","Downstream — bomba de servicio"]],
+    temp_title: "TEMPERATURA — 4 CANALES",
+    temp_items: [["T-PDG","Downhole Gauge"],["T-TPT","Tubing Pressure Transducer"],["T-MON-CKP","Upstream — choke de producción"],["T-JUS-CKP","Downstream — choke de producción"]],
+    flow_title: "CAUDAL — 2 CANALES",
+    flow_items: [["QGL","Inyección de gas-lift [m³/s]"],["QBS","Caudal de bomba de servicio [m³/s]"]],
+    valves_label: "Estados de Válvulas y Actuadores",
+    valve_groups: [
+      { h:"VÁLVULAS DE SEGURIDAD — 3", items:[["ESTADO-DHSV","Downhole Safety Valve","Cierre no programado → shutdown completo + fuga de gas"],["ESTADO-SDV-P","Production Shutdown Valve","Aísla la línea de flujo de producción"],["ESTADO-SDV-GL","Gas-Lift Shutdown Valve","Corta la línea de inyección de gas"]] },
+      { h:"ÁRBOL DE POZO — 4", items:[["ESTADO-M1","Production Master Valve (PMV)","Aislación primaria de producción"],["ESTADO-M2","Annulus Master Valve (AMV)","Aislación de línea anular"],["ESTADO-W1","Production Wing Valve (PWV)","Rama de producción del árbol"],["ESTADO-W2","Annulus Wing Valve (AWV)","Rama anular del árbol"]] },
+      { h:"APERTURAS DE CHOKE — 2 / CROSSOVER — 2", items:[["ABER-CKP","Production Choke [% abierto]","Control de flujo primario — variable clave de régimen"],["ABER-CKGL","Gas-Lift Choke [% abierto]","Controla el volumen de inyección de gas"],["ESTADO-PXO","Pig Crossover Valve","Operaciones de pigging"],["ESTADO-XO","Crossover Valve","Configuración de ruteo de líneas"]] },
+    ],
+    regime_title: "Lógica de Régimen Operativo",
+    regime_q1: "¿Qué es un régimen?", regime_a1: "Un régimen operativo es la combinación única de estados de válvulas y configuraciones de choke en un momento dado — define qué líneas de flujo están activas, si el gas-lift está en operación, y cómo está configurado el choke.",
+    regime_q2: "¿Por qué importa para la detección?", regime_a2: "Los rangos físicos de los sensores difieren significativamente entre regímenes. Una lectura de presión normal bajo producción con gas-lift puede ser anómala durante crossover. Toda normalización es condicional al régimen operativo.",
+    regime_build_label: "Construcción:", regime_build: "Las variables ESTADO-* se mapean a enteros (0 = cerrado, 1 = abierto). Las aperturas ABER-* se discretizan a binario o ternario. La cadena concatenada identifica unívocamente el régimen. Regímenes dispersos (<50k muestras) se consolidan en un bucket de Régimen General → ~11 regímenes distintos.",
+    pf3: "Tipos de Datos y Equipamiento",
+    // s4
+    s4_title: "Clasificación de Fallas", s4_sub: "9 clases de anomalías — causa, proporción y severidad",
+    table_heads: ["#","Tipo de Falla","","% Tiempo","Sev."],
+    fault_rows: [
+      [0,"Operación Normal","12,158,183","37.0%","—"],
+      [7,"Incrustación en PCK","7,864,945","23.9%","High"],
+      [8,"Hidrato — Línea de Producción","4,809,035","14.6%","Crit"],
+      [4,"Inestabilidad de Flujo","3,689,683","11.2%","Med"],
+      [9,"Hidrato — Línea de Servicio","2,635,372","8.0%","High"],
+      [3,"Slugging Severo","684,352","2.1%","Crit"],
+      [5,"Pérdida Rápida de Productividad","439,408","1.3%","High"],
+      [2,"Cierre Espurio de DHSV","277,001","0.8%","Crit"],
+      [1,"Incremento Abrupto de BSW","236,794","0.7%","Med"],
+      [6,"Restricción Rápida de PCK","77,477","0.2%","Med"],
+    ],
+    fault_rows_suffix: "filas",
+    fault_desc_title: "Descripción de Fallas",
+    fault_descs: [
+      ["7 — Incrustación en PCK","Depósitos minerales estrechan progresivamente el bore del choke. El caudal disminuye gradualmente — pasa desapercibido durante semanas sin monitoreo."],
+      ["8 — Hidrato — Línea de Producción","Cristales de gas/agua bloquean la línea de flujo. Pérdida total de producción; la limpieza requiere blowdown con fuga de gas asociada."],
+      ["4 — Inestabilidad de Flujo","Flujo multifásico irregular. Reduce eficiencia; precursor conocido de eventos de slugging severo."],
+      ["3 — Slugging Severo","Oscilaciones periódicas de presión en el riser. Disparo de equipos y desgaste mecánico acelerado."],
+      ["2 — Cierre Espurio de DHSV","Válvula de seguridad cierra sin comando. Shutdown completo; requiere despresurización controlada con fuga de gas."],
+      ["5 — Pérdida Rápida de Productividad","El pozo produce por debajo de lo esperado sin cambios en el choke. Indica cambio en el reservorio o restricción interna."],
+      ["1 — Incremento Abrupto de BSW","Aumento súbito en la fracción de agua/sedimento. Degrada la calidad del fluido; precursor de daño."],
+      ["6 — Restricción Rápida de PCK","Cierre abrupto del choke genera transitorios fuertes de presión y flujo en todo el sistema."],
+    ],
+    pf4: "Clasificación de Fallas — Clases 0–9",
+    // s5
+    s5_title: "Metodología de Procesamiento", s5_sub: "De telemetría SCADA cruda a señal de anomalía",
+    processing_steps: [
+      {n:"01",t:"Ingestión Temporal y Split",d:"Orden cronológico mantenido en todo el pipeline. Split estricto train / val / test / holdout sin fuga de datos. El entrenamiento utiliza únicamente datos normales. Los conjuntos de validación y test están balanceados 50/50 entre todas las clases de fallas para evaluación imparcial.",tags:["Zero leakage","Orden cronológico"]},
+      {n:"02",t:"Clasificación de Régimen",d:"Los estados de válvulas (ESTADO-*) y aperturas de choke (ABER-*) se discretizan y concatenan en un string de régimen por observación. Regímenes con menos de 50,000 muestras se consolidan en un bucket de Régimen General, resultando en aproximadamente 11 regímenes distintos.",tags:["ESTADO-* + ABER-*","~11 regímenes finales"]},
+      {n:"03",t:"Manejo de NaN",d:"Forward-fill seguido de backward-fill por canal. Variables de régimen rellenadas con moda o cero. Variables de sensores físicos imputadas usando medianas por régimen del set de entrenamiento. Las variables de régimen y operativas se tratan de forma completamente independiente.",tags:["Forward / backward fill","Imputación por régimen"]},
+      {n:"04",t:"Normalización Condicionada por Régimen",d:"Sensores físicos normalizados como (x − μᵣ) / σᵣ, con estadísticas computadas exclusivamente desde observaciones normales de entrenamiento dentro de cada régimen. Fallback global para regímenes dispersos. Las variables de régimen (estados discretos, aperturas) nunca se normalizan.",tags:["μ/σ desde train-normal","Régimen-condicional"]},
+      {n:"05",t:"Escalado MinMax + Capping de Outliers",d:"Sensores físicos escalados a [0, 1] usando MinMaxScaler ajustado únicamente sobre datos de entrenamiento. Valores limitados al percentil 1–99 de entrenamiento, suprimiendo transitorios extremos que de otro modo inflarían los scores de anomalía.",tags:["Fit solo en train","Percentil 1st–99th"]},
+      {n:"06",t:"Ingeniería de Features",d:"Features derivados computados después de toda la normalización: tasa de cambio por canal (delta), diferenciales de presión cross-sensor, y estadísticas de ventana deslizante. Aplicados únicamente a variables operativas validadas sin valores NaN remanentes.",tags:["Deltas","Ratios de presión","Rolling stats"]},
+    ],
+    pf5: "Pipeline de Procesamiento de Datos",
+    // s6
+    s6_title: "Arquitectura de Detección", s6_sub: "Cascada de tres capas — detección desacoplada de clasificación",
+    s6_intro: ["El sistema separa la ","detección"," de anomalías de la ","anotación"," de fallas por diseño. La detección (Capas 1–2) no requiere datos etiquetados de fallas y puede desplegarse inmediatamente con cualquier operador. La anotación (Capa 3) es una capa de enriquecimiento opcional que mejora progresivamente a medida que se acumula historial de fallas etiquetadas."],
+    layers: [
+      { n:"01", l:"Detectar", sub:"Estadístico + Isolation Forest", q:"Identificar lo que no se ve normal", rows:[["DATOS REQ.","Solo operación normal"],["OUTPUT","Anomaly score [0 → 1]"],["UMBRAL","Calibrado en set de validación"],["BENEFICIO","Cero etiquetas de falla necesarias"]] },
+      { n:"02", l:"Clasificar", sub:"Anotación Supervisada", q:"Nombrar el tipo de falla", rows:[["DATOS REQ.","Incidentes históricos etiquetados"],["OUTPUT","Clase de falla + confianza"],["MODELOS","Decision Tree + Log. Regression"],["BENEFICIO","Mejora con el tiempo"]] },
+      { n:"03", l:"Alertar", sub:"Notificación al Operador", q:"La información correcta, en el momento correcto", rows:[["CONTENIDO","Clase + severidad + canales"],["TIMING","Ventana de intervención next-day"],["INTEGRACIÓN","SCADA / OPC-UA / REST API"],["BENEFICIO","Sin fatiga de alarmas"]] },
+    ],
+    layer_label: "CAPA",
+    flow_nodes: ["Datos SCADA","Clasif. Régimen","L1 Filtro Estadístico","L2 Isolation Forest","L3 Anotación Supervisada","Alerta al Operador"],
+    pf6: "Arquitectura de Detección en Cascada",
+    // s7
+    s7_title: "Resultados Validados", s7_sub: "Impacto estimado a partir de la distribución de fallas observada",
+    s7_metric1: "$8M/año", s7_label1: "Valor de producción recuperada",
+    s7_metric2: "146t CH₄", s7_label2: "Emisiones de metano evitadas por año",
+    impact_table_title: "Desglose de impacto por tipo de falla",
+    impact_heads: ["Tipo de Falla","% Tiempo","Mecanismo de Pérdida Principal","Valor Est.","CH₄","Sev."],
+    impact_rows: [
+      ["Incrustación en PCK","23.93%","Pérdida gradual de caudal por estrechamiento progresivo del choke","$4.2M","Low","High"],
+      ["Hidrato — Línea Prod.","14.63%","Bloqueo total; pérdida de producción + fuga de gas por blowdown","$2.1M + 82t","Crit","Crit"],
+      ["Inestabilidad de Flujo","11.22%","Degradación de eficiencia y desgaste acelerado de equipos","$0.9M","Low","Med"],
+      ["Hidrato — Línea Serv.","8.02%","Impacto indirecto: operaciones de inyección y soporte interrumpidas","$0.4M + 38t","High","High"],
+      ["Cierre Espurio DHSV","0.84%","Shut-in no planificado; despresurización con fuga de gas","$0.3M + 26t","Crit","Crit"],
+    ],
+    pf7: "Resultados — Impacto Económico y de Emisiones",
+    // s8
+    s8_title: "Preguntas Frecuentes", s8_sub: "Respuestas anticipadas a las consultas técnicas y operativas más relevantes",
+    faqs: [
+      { q:"¿Cómo tienen que venir los datos?", a:"Series temporales en formato tabular (CSV, Parquet o exportación directa del historian SCADA). Cada fila = timestamp + lecturas de sensores. No necesitan estar limpios — nuestro pipeline maneja NaN, congelamiento de señales y gaps temporales de forma nativa. Mínimo requerido: timestamp + presión + temperatura + caudal." },
+      { q:"¿Qué tanta información de la operación necesitan?", a:"Para la primera corrida: datos SCADA crudos + listado de qué mide cada tag. El sistema aprende el comportamiento normal directamente de los datos. Info adicional (tipo de válvulas, árbol de pozo) mejora la clasificación de régimen pero no es excluyente. Además, complementamos con investigación propia en papers técnicos sobre los tipos de fallas específicos." },
+      { q:"¿Cómo se relaciona el caso de Petrobras con otras operaciones?", a:"Las variables físicas (presión, temperatura, caudal) y los tipos de fallas (hidratos, incrustaciones, slugging, DHSV) son universales en O&G. El caso de Petrobras valida la metodología — no se transfiere el modelo. El sistema se reentrena completamente con datos de cada operador, generando un modelo específico para cada caso." },
+      { q:"¿Cómo calcularon los $8M y las 146t de CH₄? ¿Cuánto representa de la operación total?", a:"$8M: distribución de fallas observada × tasas de pérdida de producción publicadas × $75/bbl con supuesto de intervención en 24hrs. 146t CH₄: eventos que requieren blowdown (hidratos + DHSV) con liberación de gas. Son una ilustración de orden de magnitud para un cluster offshore. Un piloto cuantificaría el impacto real para la escala específica de cada operador." },
+      { q:"¿Qué tan grande es la operación analizada?", a:"32.8M de observaciones a intervalos de 1 minuto, 24 canales de sensores, 1,119 instancias reales etiquetadas, 9 tipos de fallas confirmadas. Es una de las bases de datos públicas más completas y citadas (100+ publicaciones académicas) para detección de anomalías en producción de petróleo y gas." },
+      { q:"¿Qué tanto necesitan saber de la operación para correr los algoritmos?", a:"Muy poco al inicio. La Capa 1 (detección) es no supervisada — aprende qué es 'normal' directamente de los datos. Lo primero que hacemos es un pre-análisis automático que identifica qué sensores reaccionan ante cada tipo de anomalía. Lo que sí necesitamos es que un experto valide los hallazgos: cuando el sistema detecta algo, el SME confirma si es real. Esa retroalimentación mejora la clasificación progresivamente." },
+      { q:"¿Cómo y quién clasificó los tipos de fallas?", a:"Clasificadas por ingenieros de operaciones y expertos en integridad de pozos de Petrobras, basándose en reportes de incidentes confirmados. Taxonomía documentada en publicaciones peer-reviewed (Journal of Petroleum Science and Engineering, 2019). Para cada nuevo operador, la clasificación se construye en conjunto con el equipo técnico a partir de sus propios registros." },
+    ],
+    pf8: "Preguntas Frecuentes",
+    // footer
+    footer_sub: "Detección de Fugas de Gas mediante IA",
+    footer_stats: [["32.8M","Observaciones"],["9","Clases de Fallas"],["$8M","Recuperable /año"],["146t","CH₄ Evitado"]],
+    footer_ecosystem: "RESPALDO Y ECOSISTEMA",
+    footer_conf: "Confidencial — para uso exclusivo de inversores y clientes",
+    // nav labels
+    nav_labels: ["Portada","Dataset","Datos","Fallas","Procesamiento","Arquitectura","Resultados","FAQ"],
+  },
+  en: {
+    headerSub: "Technical Case Study",
+    confidential: "CONFIDENTIAL",
+    cover_label: "Technical Case Study",
+    cover_h1_1: "Early Detection of",
+    cover_h1_2: "Gas Leaks via AI",
+    cover_h1_3: "in Offshore Operations",
+    cover_body: "Technical validation of VÖRNTEC's detection pipeline applied to real SCADA telemetry from Petrobras' 3W Dataset — 32.8M observations, 24 sensor channels, 9 confirmed fault types.",
+    inputs: "INPUTS",
+    outputs: "OUTPUTS",
+    kv_telemetry: "SCADA Telemetry", kv_telemetry_v: "32,872,250 observations",
+    kv_channels: "Sensor channels", kv_channels_v: "24 signals",
+    kv_signal: "Signal types", kv_signal_v: "Pressure / Temp / Flow",
+    kv_classes: "Labeled fault classes", kv_classes_v: "9 types",
+    out_metric1: "$8M/yr", out_label1: "Recovered production value",
+    out_metric2_suffix: "t CH₄", out_label2: "Methane emissions avoided per year",
+    ben1_title: "Operational Efficiency", ben1_desc: "Proactive detection of faults causing production losses invisible to conventional threshold-based alarm systems.",
+    ben2_title: "Safety", ben2_desc: "Early identification of risk conditions such as spurious DHSV closures and severe slugging before they escalate.",
+    ben3_title: "Environmental Impact", ben3_desc: "Methane emission reduction through early detection of gas leaks and blockages requiring blowdown.",
+    cover_footer: "vorntec.com\nConfidential — for exclusive use by investors and clients",
+    pf1: "Executive Summary",
+    s2_title: "The Dataset", s2_sub: "Origin, composition and credibility",
+    s2_origin_title: "Origin: 3W Dataset — Petrobras",
+    s2_origin_body: "The dataset originates from real SCADA telemetry recorded across multiple offshore wells operated by a major production company. Data was captured at one-minute intervals across 24 sensor channels, covering normal operations and nine confirmed fault categories. Well identifiers are fully anonymised.",
+    s2_disclaimer: "Publicly available data (3W Dataset v2.0.0, CC BY 4.0). No commercial or contractual relationship exists between VÖRNTEC and Petrobras. Dataset used exclusively as a technical benchmark.",
+    composicion: "COMPOSITION",
+    kv_total: "Total observations", kv_total_v: "32,872,250",
+    kv_normal: "Normal rows (Class 0)", kv_normal_v: "12,158,183",
+    kv_anomal: "Anomalous rows (Classes 1–9)", kv_anomal_v: "20,714,067",
+    kv_canales: "Sensor channels", kv_canales_v: "24",
+    kv_interval: "Sampling interval", kv_interval_v: "1 minute",
+    kv_fallas_labeled: "Labeled fault types", kv_fallas_labeled_v: "9",
+    kv_instances: "Real labeled instances", kv_instances_v: "1,119",
+    kv_simulated: "Simulated instances", kv_simulated_v: "1,089 — excluded",
+    hallazgo: "KEY FINDING",
+    hallazgo_h: "63% of monitored time corresponds to an active fault condition.",
+    hallazgo_body: "Analysis reveals that time in anomalous state substantially exceeds time in normal operation. These faults develop progressively and sub-threshold, without triggering conventional fixed-threshold alarm systems — evidencing a structural limitation of traditional monitoring approaches.",
+    dist_label: "Distribution by observation count",
+    normal_label: "Normal Operation (Class 0)", fault_label: "All Faults (1–9)",
+    imbalance_note_label: "Class imbalance note:", imbalance_note: "Extreme ratio — up to 1:500 between rarest and most frequent class. Addressed through balanced evaluation sets. Training uses normal data exclusively for the unsupervised layer.",
+    pf2: "Dataset Summary",
+    s3_title: "Data Types & Equipment", s3_sub: "The 24 monitored signals and their physical context",
+    pres_label: "Physical Process Sensors",
+    pres_title: "PRESSURE — 10 CHANNELS",
+    pres_items: [["P-PDG","Permanent Downhole Gauge"],["P-TPT","Tubing Pressure Transducer"],["P-MON-CKP","Upstream — production choke"],["P-JUS-CKP","Downstream — production choke"],["P-MON-CKGL","Upstream — gas-lift choke"],["P-JUS-CKGL","Downstream — gas-lift choke"],["P-ANULAR","Annular pressure"],["P-MON-SDV-P","Upstream — production SDV"],["PT-P","Production wing valve"],["P-JUS-BS","Downstream — service pump"]],
+    temp_title: "TEMPERATURE — 4 CHANNELS",
+    temp_items: [["T-PDG","Downhole Gauge"],["T-TPT","Tubing Pressure Transducer"],["T-MON-CKP","Upstream — production choke"],["T-JUS-CKP","Downstream — production choke"]],
+    flow_title: "FLOW — 2 CHANNELS",
+    flow_items: [["QGL","Gas-lift injection [m³/s]"],["QBS","Service pump flow [m³/s]"]],
+    valves_label: "Valve & Actuator States",
+    valve_groups: [
+      { h:"SAFETY VALVES — 3", items:[["ESTADO-DHSV","Downhole Safety Valve","Unplanned closure → full shutdown + gas leak"],["ESTADO-SDV-P","Production Shutdown Valve","Isolates the production flowline"],["ESTADO-SDV-GL","Gas-Lift Shutdown Valve","Cuts the gas injection line"]] },
+      { h:"WELLHEAD TREE — 4", items:[["ESTADO-M1","Production Master Valve (PMV)","Primary production isolation"],["ESTADO-M2","Annulus Master Valve (AMV)","Annular line isolation"],["ESTADO-W1","Production Wing Valve (PWV)","Production branch of tree"],["ESTADO-W2","Annulus Wing Valve (AWV)","Annular branch of tree"]] },
+      { h:"CHOKE OPENINGS — 2 / CROSSOVER — 2", items:[["ABER-CKP","Production Choke [% open]","Primary flow control — key regime variable"],["ABER-CKGL","Gas-Lift Choke [% open]","Controls gas injection volume"],["ESTADO-PXO","Pig Crossover Valve","Pigging operations"],["ESTADO-XO","Crossover Valve","Line routing configuration"]] },
+    ],
+    regime_title: "Operating Regime Logic",
+    regime_q1: "What is a regime?", regime_a1: "An operating regime is the unique combination of valve states and choke configurations at any given moment — it defines which flowlines are active, whether gas-lift is operating, and how the choke is set.",
+    regime_q2: "Why does it matter for detection?", regime_a2: "Sensor physical ranges differ significantly across regimes. A normal pressure reading under gas-lift production may be anomalous during crossover. All normalisation is conditional on the operating regime.",
+    regime_build_label: "Construction:", regime_build: "ESTADO-* variables are mapped to integers (0 = closed, 1 = open). ABER-* openings are discretised to binary or ternary. The concatenated string uniquely identifies the regime. Sparse regimes (<50k samples) are consolidated into a General Regime bucket → ~11 distinct regimes.",
+    pf3: "Data Types & Equipment",
+    s4_title: "Fault Classification", s4_sub: "9 anomaly classes — cause, proportion and severity",
+    table_heads: ["#","Fault Type","","% Time","Sev."],
+    fault_rows: [
+      [0,"Normal Operation","12,158,183","37.0%","—"],
+      [7,"PCK Scale Buildup","7,864,945","23.9%","High"],
+      [8,"Hydrate — Production Line","4,809,035","14.6%","Crit"],
+      [4,"Flow Instability","3,689,683","11.2%","Med"],
+      [9,"Hydrate — Service Line","2,635,372","8.0%","High"],
+      [3,"Severe Slugging","684,352","2.1%","Crit"],
+      [5,"Rapid Productivity Loss","439,408","1.3%","High"],
+      [2,"Spurious DHSV Closure","277,001","0.8%","Crit"],
+      [1,"Abrupt BSW Increase","236,794","0.7%","Med"],
+      [6,"Rapid PCK Restriction","77,477","0.2%","Med"],
+    ],
+    fault_rows_suffix: "rows",
+    fault_desc_title: "Fault Descriptions",
+    fault_descs: [
+      ["7 — PCK Scale Buildup","Mineral deposits progressively narrow the choke bore. Flow rate decreases gradually — goes unnoticed for weeks without monitoring."],
+      ["8 — Hydrate — Production Line","Gas/water crystals block the flowline. Total production loss; clean-up requires blowdown with associated gas release."],
+      ["4 — Flow Instability","Irregular multiphase flow. Reduces efficiency; known precursor to severe slugging events."],
+      ["3 — Severe Slugging","Periodic pressure oscillations in the riser. Equipment trips and accelerated mechanical wear."],
+      ["2 — Spurious DHSV Closure","Safety valve closes without command. Full shutdown; requires controlled depressurisation with gas release."],
+      ["5 — Rapid Productivity Loss","Well produces below expected without choke changes. Indicates reservoir change or internal restriction."],
+      ["1 — Abrupt BSW Increase","Sudden rise in water/sediment fraction. Degrades fluid quality; damage precursor."],
+      ["6 — Rapid PCK Restriction","Abrupt choke closure generates strong pressure and flow transients across the system."],
+    ],
+    pf4: "Fault Classification — Classes 0–9",
+    s5_title: "Processing Methodology", s5_sub: "From raw SCADA telemetry to anomaly signal",
+    processing_steps: [
+      {n:"01",t:"Temporal Ingestion & Split",d:"Chronological order maintained throughout the pipeline. Strict train / val / test / holdout split with no data leakage. Training uses only normal data. Validation and test sets are balanced 50/50 across all fault classes for unbiased evaluation.",tags:["Zero leakage","Chronological order"]},
+      {n:"02",t:"Regime Classification",d:"Valve states (ESTADO-*) and choke openings (ABER-*) are discretised and concatenated into a regime string per observation. Regimes with fewer than 50,000 samples are consolidated into a General Regime bucket, resulting in approximately 11 distinct regimes.",tags:["ESTADO-* + ABER-*","~11 final regimes"]},
+      {n:"03",t:"NaN Handling",d:"Forward-fill followed by backward-fill per channel. Regime variables filled with mode or zero. Physical sensor variables imputed using per-regime medians from the training set. Regime and operational variables are handled completely independently.",tags:["Forward / backward fill","Per-regime imputation"]},
+      {n:"04",t:"Regime-Conditioned Normalisation",d:"Physical sensors normalised as (x − μᵣ) / σᵣ, with statistics computed exclusively from normal training observations within each regime. Global fallback for sparse regimes. Regime variables (discrete states, openings) are never normalised.",tags:["μ/σ from train-normal","Regime-conditional"]},
+      {n:"05",t:"MinMax Scaling + Outlier Capping",d:"Physical sensors scaled to [0, 1] using MinMaxScaler fitted exclusively on training data. Values capped at the 1st–99th percentile of training, suppressing extreme transients that would otherwise inflate anomaly scores.",tags:["Fit on train only","1st–99th percentile"]},
+      {n:"06",t:"Feature Engineering",d:"Derived features computed after all normalisation: per-channel rate of change (delta), cross-sensor pressure differentials, and rolling window statistics. Applied only to validated operational variables with no remaining NaN values.",tags:["Deltas","Pressure ratios","Rolling stats"]},
+    ],
+    pf5: "Data Processing Pipeline",
+    s6_title: "Detection Architecture", s6_sub: "Three-layer cascade — detection decoupled from classification",
+    s6_intro: ["The system separates anomaly ","detection"," from fault ","annotation"," by design. Detection (Layers 1–2) requires no labeled fault data and can be deployed immediately with any operator. Annotation (Layer 3) is an optional enrichment layer that improves progressively as labeled fault history accumulates."],
+    layers: [
+      { n:"01", l:"Detect", sub:"Statistical + Isolation Forest", q:"Identify what doesn't look normal", rows:[["DATA REQ.","Normal operation only"],["OUTPUT","Anomaly score [0 → 1]"],["THRESHOLD","Calibrated on validation set"],["BENEFIT","Zero fault labels needed"]] },
+      { n:"02", l:"Classify", sub:"Supervised Annotation", q:"Name the fault type", rows:[["DATA REQ.","Labeled historical incidents"],["OUTPUT","Fault class + confidence"],["MODELS","Decision Tree + Log. Regression"],["BENEFIT","Improves over time"]] },
+      { n:"03", l:"Alert", sub:"Operator Notification", q:"The right information, at the right time", rows:[["CONTENT","Class + severity + channels"],["TIMING","Next-day intervention window"],["INTEGRATION","SCADA / OPC-UA / REST API"],["BENEFIT","No alarm fatigue"]] },
+    ],
+    layer_label: "LAYER",
+    flow_nodes: ["SCADA Data","Regime Class.","L1 Statistical Filter","L2 Isolation Forest","L3 Supervised Annotation","Operator Alert"],
+    pf6: "Cascaded Detection Architecture",
+    s7_title: "Validated Results", s7_sub: "Estimated impact from observed fault distribution",
+    s7_metric1: "$8M/yr", s7_label1: "Recovered production value",
+    s7_metric2: "146t CH₄", s7_label2: "Methane emissions avoided per year",
+    impact_table_title: "Impact breakdown by fault type",
+    impact_heads: ["Fault Type","% Time","Primary Loss Mechanism","Est. Value","CH₄","Sev."],
+    impact_rows: [
+      ["PCK Scale Buildup","23.93%","Gradual flow loss from progressive choke narrowing","$4.2M","Low","High"],
+      ["Hydrate — Prod. Line","14.63%","Total blockage; production loss + gas leak via blowdown","$2.1M + 82t","Crit","Crit"],
+      ["Flow Instability","11.22%","Efficiency degradation and accelerated equipment wear","$0.9M","Low","Med"],
+      ["Hydrate — Serv. Line","8.02%","Indirect impact: injection and support operations disrupted","$0.4M + 38t","High","High"],
+      ["Spurious DHSV Closure","0.84%","Unplanned shut-in; depressurisation with gas release","$0.3M + 26t","Crit","Crit"],
+    ],
+    pf7: "Results — Economic & Emissions Impact",
+    s8_title: "Frequently Asked Questions", s8_sub: "Anticipated responses to the most relevant technical and operational queries",
+    faqs: [
+      { q:"How does the data need to come in?", a:"Time series in tabular format (CSV, Parquet, or direct historian export from SCADA). Each row = timestamp + sensor readings. They don't need to be clean — our pipeline handles NaN, signal freezing, and temporal gaps natively. Minimum required: timestamp + pressure + temperature + flow." },
+      { q:"How much operational information do you need?", a:"For the first run: raw SCADA data + a list of what each tag measures. The system learns normal behaviour directly from the data. Additional info (valve types, wellhead tree) improves regime classification but is not a prerequisite. We also complement with our own research on technical papers covering the specific fault types." },
+      { q:"How does the Petrobras case relate to other operations?", a:"The physical variables (pressure, temperature, flow) and fault types (hydrates, scale, slugging, DHSV) are universal in O&G. The Petrobras case validates the methodology — the model is not transferred. The system is fully retrained with each operator's data, generating a specific model for each case." },
+      { q:"How were the $8M and 146t CH₄ calculated? What share of the total operation does that represent?", a:"$8M: observed fault distribution × published production loss rates × $75/bbl assuming 24hr intervention. 146t CH₄: events requiring blowdown (hydrates + DHSV) with gas release. These are order-of-magnitude illustrations for an offshore cluster. A pilot would quantify the real impact for each operator's specific scale." },
+      { q:"How large is the analysed operation?", a:"32.8M observations at 1-minute intervals, 24 sensor channels, 1,119 real labeled instances, 9 confirmed fault types. It is one of the most comprehensive and cited public databases (100+ academic publications) for anomaly detection in oil and gas production." },
+      { q:"How much do you need to know about the operation to run the algorithms?", a:"Very little at the start. Layer 1 (detection) is unsupervised — it learns what 'normal' is directly from the data. The first thing we do is an automatic pre-analysis that identifies which sensors react to each anomaly type. What we do need is for an expert to validate the findings: when the system detects something, the SME confirms whether it is real. That feedback progressively improves classification." },
+      { q:"How and who classified the fault types?", a:"Classified by operations engineers and well integrity experts at Petrobras, based on confirmed incident reports. Taxonomy documented in peer-reviewed publications (Journal of Petroleum Science and Engineering, 2019). For each new operator, classification is built jointly with the technical team from their own records." },
+    ],
+    pf8: "Frequently Asked Questions",
+    footer_sub: "AI-Powered Gas Leak Detection",
+    footer_stats: [["32.8M","Observations"],["9","Fault Classes"],["$8M","Recoverable /yr"],["146t","CH₄ Avoided"]],
+    footer_ecosystem: "BACKING & ECOSYSTEM",
+    footer_conf: "Confidential — for exclusive use by investors and clients",
+    nav_labels: ["Cover","Dataset","Data","Faults","Processing","Architecture","Results","FAQ"],
+  }
+};
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
   bg:"#07070b", page:"#0c0c12", surface:"#111118", card:"#15151e",
   border:"#1e1e2a", border2:"#282838",
@@ -54,15 +360,14 @@ const C = {
   blue:"#448aff", blueDim:"rgba(68,138,255,0.08)",
   amber:"#ffab00", amberDim:"rgba(255,171,0,0.08)",
   red:"#ff5252",
-  // Improved contrast: bumped text colors significantly
   white:"#eef0f4", text:"#cccde0", dim:"#9a9ab8", muted:"#6e6e8e", faint:"#4a4a66",
-  outBg:"#171724", // slightly lighter bg for outputs card
+  outBg:"#171724",
   mono:"'JetBrains Mono','Fira Code','Consolas',monospace",
   sans:"'DM Sans','Inter','Segoe UI',system-ui,sans-serif",
 };
-
 const TP = "08";
 
+// ── Fade-in component ─────────────────────────────────────────────────────────
 function F({ children, d = 0 }) {
   const r = useRef(null); const [v, sv] = useState(false);
   useEffect(() => { const o = new IntersectionObserver(([e]) => e.isIntersecting && sv(true), { threshold: 0.06 }); r.current && o.observe(r.current); return () => o.disconnect(); }, []);
@@ -124,8 +429,19 @@ function Logo({ name, w=100, h=32, light=false }) {
   </div>;
 }
 
+// ── Lang Toggle ───────────────────────────────────────────────────────────────
+function LangToggle({ lang, setLang }) {
+  return <div className="lang-toggle">
+    <button className={`lang-btn ${lang==="en"?"active":"inactive"}`} onClick={() => setLang("en")}>EN</button>
+    <button className={`lang-btn ${lang==="es"?"active":"inactive"}`} onClick={() => setLang("es")}>ES</button>
+  </div>;
+}
+
+// ── Main App ──────────────────────────────────────────────────────────────────
 function App() {
   const [sec, setSec] = useState(0);
+  const [lang, setLang] = useState("es");
+  const t = T[lang];
   const ids = ["s1","s2","s3","s4","s5","s6","s7","s8"];
 
   useEffect(() => {
@@ -135,7 +451,17 @@ function App() {
 
   const go = i => document.getElementById(ids[i])?.scrollIntoView({ behavior:"smooth" });
 
+  // layer colors
+  const layerColors = [C.green, C.blue, C.amber];
+  // fault desc colors
+  const faultDescColors = [C.amber, C.red, C.blue, C.red, C.red, C.amber, C.blue, C.blue];
+  // faq colors
+  const faqColors = [C.blue, C.green, C.amber, C.green, C.blue, C.amber, C.green];
+  // processing step colors
+  const stepColors = [C.blue, C.green, C.amber, C.blue, C.green, C.amber];
+
   return (
+    <LangCtx.Provider value={lang}>
     <div style={{ background:C.bg, color:C.text, fontFamily:C.sans }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
       <style>{`*{box-sizing:border-box;margin:0;padding:0}body{background:${C.bg}}::selection{background:${C.green}30;color:${C.white}}html{scroll-behavior:smooth}`}</style>
@@ -146,69 +472,66 @@ function App() {
           <div style={{ display:"flex", alignItems:"center", gap:12 }}>
             <Logo name="vorntec-logo.png" w={90} h={28}/>
             <span className="gheader-text" style={{ width:1, height:16, background:C.border, display:"inline-block" }}/>
-            <span className="gheader-text" style={{ fontSize:11, color:C.dim }}>Caso de Estudio Técnico</span>
+            <span className="gheader-text" style={{ fontSize:11, color:C.dim }}>{t.headerSub}</span>
           </div>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <span style={{ fontSize:9, fontWeight:700, fontFamily:C.mono, letterSpacing:".1em", color:C.muted, padding:"2px 8px", border:`1px solid ${C.border}`, borderRadius:3 }}>CONFIDENCIAL</span>
+            <LangToggle lang={lang} setLang={setLang}/>
+            <span style={{ fontSize:9, fontWeight:700, fontFamily:C.mono, letterSpacing:".1em", color:C.muted, padding:"2px 8px", border:`1px solid ${C.border}`, borderRadius:3 }}>{t.confidential}</span>
           </div>
         </div>
       </header>
 
       {/* NAV */}
       <nav className="gnav" style={{ position:"fixed", right:14, top:"50%", transform:"translateY(-50%)", display:"flex", flexDirection:"column", gap:5, zIndex:100 }}>
-        {ids.map((_,i) => <button key={i} onClick={() => go(i)} style={{ width:sec===i?20:7, height:7, borderRadius:4, border:"none", cursor:"pointer", padding:0, background:sec===i?C.green:C.border2, transition:"all .3s" }}/>)}
+        {ids.map((_,i) => <button key={i} onClick={() => go(i)} title={t.nav_labels[i]} style={{ width:sec===i?20:7, height:7, borderRadius:4, border:"none", cursor:"pointer", padding:0, background:sec===i?C.green:C.border2, transition:"all .3s" }}/>)}
       </nav>
 
-{/* ═══ 01 — PORTADA ═══ */}
+{/* ═══ 01 — COVER ═══ */}
       <Page id="s1">
         <F>
           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:48 }}>
             <span style={{ fontSize:15, fontWeight:800, fontFamily:C.mono, color:C.green, letterSpacing:".06em" }}>VÖRNTEC</span>
             <span style={{ color:C.faint, fontFamily:C.mono, fontSize:12 }}>—</span>
-            <span style={{ fontSize:12, fontFamily:C.mono, color:C.dim }}>Caso de Estudio Técnico</span>
+            <span style={{ fontSize:12, fontFamily:C.mono, color:C.dim }}>{t.cover_label}</span>
           </div>
         </F>
         <F d={80}>
           <h1 className="gh1" style={{ fontSize:"clamp(28px,4.2vw,46px)", fontWeight:800, color:C.white, lineHeight:1.1, letterSpacing:"-.03em", marginBottom:20 }}>
-            Detección Temprana de<br/>
-            Fugas de Gas mediante IA<br/>
-            <span style={{ color:C.green }}>en Operación Offshore</span>
+            {t.cover_h1_1}<br/>
+            {t.cover_h1_2}<br/>
+            <span style={{ color:C.green }}>{t.cover_h1_3}</span>
           </h1>
         </F>
         <F d={160}>
-          <p style={{ fontSize:15, color:C.text, lineHeight:1.7, maxWidth:600, marginBottom:40 }}>
-            Validación técnica del pipeline de detección de VÖRNTEC aplicado a telemetría SCADA real del Dataset 3W de Petrobras — 32.8M de observaciones, 24 canales de sensores, 9 tipos de fallas confirmadas.
-          </p>
+          <p style={{ fontSize:15, color:C.text, lineHeight:1.7, maxWidth:600, marginBottom:40 }}>{t.cover_body}</p>
         </F>
 
         <F d={220}>
           <div className="g2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20, marginBottom:28 }}>
             <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:22 }}>
-              <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.muted, letterSpacing:".1em", marginBottom:14 }}>INPUTS</div>
-              {[["Telemetría SCADA","32,872,250 observaciones"],["Canales de sensores","24 señales"],["Tipos de señal","Presión / Temp / Caudal"],["Clases de fallas etiquetadas","9 tipos"]].map(([k,v],i) => <KV key={i} k={k} v={v}/>)}
+              <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.muted, letterSpacing:".1em", marginBottom:14 }}>{t.inputs}</div>
+              {[[t.kv_telemetry,t.kv_telemetry_v],[t.kv_channels,t.kv_channels_v],[t.kv_signal,t.kv_signal_v],[t.kv_classes,t.kv_classes_v]].map(([k,v],i) => <KV key={i} k={k} v={v}/>)}
             </div>
-            {/* OUTPUTS — subtly highlighted */}
             <div style={{ background:"#1a1a28", border:`1px solid ${C.green}28`, borderRadius:8, padding:22, boxShadow:`0 0 20px ${C.green}06` }}>
-              <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.green, letterSpacing:".1em", marginBottom:14 }}>OUTPUTS</div>
+              <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.green, letterSpacing:".1em", marginBottom:14 }}>{t.outputs}</div>
               <div style={{ marginBottom:28 }}>
-                <div className="gmetric" style={{ fontSize:36, fontWeight:800, fontFamily:C.mono, color:C.green }}><Num value={8} prefix="$" suffix="M/año"/></div>
-                <div style={{ fontSize:14, color:C.white, fontWeight:600, marginTop:4 }}>Valor de producción recuperada</div>
+                <div className="gmetric" style={{ fontSize:36, fontWeight:800, fontFamily:C.mono, color:C.green }}><Num value={8} prefix="$" suffix={lang==="es"?"M/año":"M/yr"}/></div>
+                <div style={{ fontSize:14, color:C.white, fontWeight:600, marginTop:4 }}>{t.out_label1}</div>
               </div>
               <div>
-                <div className="gmetric" style={{ fontSize:36, fontWeight:800, fontFamily:C.mono, color:C.blue }}><Num value={146} suffix="t CH₄"/></div>
-                <div style={{ fontSize:14, color:C.white, fontWeight:600, marginTop:4 }}>Emisiones de metano evitadas por año</div>
+                <div className="gmetric" style={{ fontSize:36, fontWeight:800, fontFamily:C.mono, color:C.blue }}><Num value={146} suffix={" "+t.out_metric2_suffix}/></div>
+                <div style={{ fontSize:14, color:C.white, fontWeight:600, marginTop:4 }}>{t.out_label2}</div>
               </div>
             </div>
           </div>
         </F>
 
-        {/* Benefits — below inputs/outputs */}
         <F d={320}>
           <div className="g3" style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:1, background:C.border, borderRadius:8, overflow:"hidden" }}>
             {[
-              { icon:"⚡", title:"Eficiencia Operacional", desc:"Detección proactiva de fallas que causan pérdidas de producción no visibles para los sistemas de alarma convencionales." },
-              { icon:"🛡", title:"Seguridad", desc:"Identificación temprana de condiciones de riesgo como cierres espurios de DHSV y slugging severo antes de que escalen." },
-              { icon:"🌿", title:"Impacto Ambiental", desc:"Reducción de emisiones de metano mediante detección anticipada de fugas de gas y bloqueos que requieren blowdown." },
+              { icon:"⚡", title:t.ben1_title, desc:t.ben1_desc },
+              { icon:"🛡", title:t.ben2_title, desc:t.ben2_desc },
+              { icon:"🌿", title:t.ben3_title, desc:t.ben3_desc },
             ].map((b,i) =>
               <div key={i} style={{ background:C.surface, padding:"20px 18px" }}>
                 <div style={{ fontSize:20, marginBottom:8 }}>{b.icon}</div>
@@ -218,70 +541,65 @@ function App() {
             )}
           </div>
         </F>
-        <F d={400}><div style={{ fontSize:11, color:C.muted, marginTop:28 }}>vorntec.com<br/>Confidencial — uso exclusivo para inversores y clientes</div></F>
-        <PF title="Resumen Ejecutivo" num="01"/>
+        <F d={400}><div style={{ fontSize:11, color:C.muted, marginTop:28 }}>{t.cover_footer.split("\n").map((l,i)=><div key={i}>{l}</div>)}</div></F>
+        <PF title={t.pf1} num="01"/>
       </Page>
 
-{/* ═══ 02 — EL DATASET ═══ */}
+{/* ═══ 02 — DATASET ═══ */}
       <Page id="s2">
-        <SH num="02" title="El Dataset" sub="Origen, composición y credibilidad"/>
+        <SH num="02" title={t.s2_title} sub={t.s2_sub}/>
         <F>
           <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:24, marginBottom:28 }}>
             <div style={{ display:"flex", alignItems:"flex-start", gap:20, marginBottom:16 }}>
               <Logo name="petrobras.png" w={120} h={48} light/>
               <div>
-                <h3 style={{ fontSize:16, fontWeight:700, color:C.white, margin:"0 0 10px" }}>Origen: Dataset 3W — Petrobras</h3>
-                <p style={{ fontSize:13, color:C.text, lineHeight:1.7, margin:0 }}>
-                  El dataset proviene de telemetría SCADA real registrada en múltiples pozos offshore operados por una compañía de producción major. Los datos fueron capturados a intervalos de un minuto a través de 24 canales de sensores, abarcando operaciones normales y nueve categorías de fallas confirmadas. Los identificadores de pozos están completamente anonimizados.
-                </p>
+                <h3 style={{ fontSize:16, fontWeight:700, color:C.white, margin:"0 0 10px" }}>{t.s2_origin_title}</h3>
+                <p style={{ fontSize:13, color:C.text, lineHeight:1.7, margin:0 }}>{t.s2_origin_body}</p>
               </div>
             </div>
-            {/* Shorter, non-highlighted disclaimer */}
-            <p style={{ fontSize:11, color:C.muted, margin:0, lineHeight:1.6 }}>
-              Datos de acceso público (3W Dataset v2.0.0, CC BY 4.0). No existe relación comercial ni contractual entre VÖRNTEC y Petrobras. Dataset utilizado exclusivamente como benchmark técnico.
-            </p>
+            <p style={{ fontSize:11, color:C.muted, margin:0, lineHeight:1.6 }}>{t.s2_disclaimer}</p>
           </div>
         </F>
         <F d={80}>
           <div className="g2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20, marginBottom:28 }}>
             <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:22 }}>
-              <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.muted, letterSpacing:".1em", marginBottom:14 }}>COMPOSICIÓN</div>
-              {[["Total de observaciones","32,872,250"],["Filas normales (Clase 0)","12,158,183"],["Filas anómalas (Clases 1–9)","20,714,067"],["Canales de sensores","24"],["Intervalo de muestreo","1 minuto"],["Tipos de fallas etiquetadas","9"],["Instancias reales etiquetadas","1,119"],["Instancias simuladas","1,089 — excluidas"]].map(([k,v],i) => <KV key={i} k={k} v={v} mono/>)}
+              <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.muted, letterSpacing:".1em", marginBottom:14 }}>{t.composicion}</div>
+              {[[t.kv_total,t.kv_total_v],[t.kv_normal,t.kv_normal_v],[t.kv_anomal,t.kv_anomal_v],[t.kv_canales,t.kv_canales_v],[t.kv_interval,t.kv_interval_v],[t.kv_fallas_labeled,t.kv_fallas_labeled_v],[t.kv_instances,t.kv_instances_v],[t.kv_simulated,t.kv_simulated_v]].map(([k,v],i) => <KV key={i} k={k} v={v} mono/>)}
             </div>
             <div>
               <div style={{ background:C.greenDim, border:`1px solid ${C.green}18`, borderRadius:8, padding:22, marginBottom:16 }}>
-                <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.green, letterSpacing:".1em", marginBottom:10 }}>HALLAZGO CLAVE</div>
-                <p style={{ fontSize:18, fontWeight:700, color:C.white, margin:"0 0 8px", lineHeight:1.35 }}>El 63% del tiempo monitoreado corresponde a una condición de falla activa.</p>
-                <p style={{ fontSize:12, color:C.text, margin:0, lineHeight:1.65 }}>El análisis revela que la proporción de tiempo en estado anómalo supera ampliamente al tiempo en operación normal. Estas fallas se desarrollan de forma progresiva y sub-umbral, sin generar activaciones en los sistemas de alarma convencionales basados en umbrales fijos — lo que evidencia una limitación estructural en los esquemas de monitoreo tradicionales.</p>
+                <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.green, letterSpacing:".1em", marginBottom:10 }}>{t.hallazgo}</div>
+                <p style={{ fontSize:18, fontWeight:700, color:C.white, margin:"0 0 8px", lineHeight:1.35 }}>{t.hallazgo_h}</p>
+                <p style={{ fontSize:12, color:C.text, margin:0, lineHeight:1.65 }}>{t.hallazgo_body}</p>
               </div>
               <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:18 }}>
-                <div style={{ fontSize:10, color:C.muted, marginBottom:8 }}>Distribución por conteo de observaciones</div>
+                <div style={{ fontSize:10, color:C.muted, marginBottom:8 }}>{t.dist_label}</div>
                 <div style={{ display:"flex", borderRadius:4, overflow:"hidden", height:28 }}>
                   <div style={{ width:"37%", background:C.green+"28", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.green }}>37.0%</div>
                   <div style={{ width:"63%", background:C.red+"20", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.red }}>63.0%</div>
                 </div>
                 <div style={{ display:"flex", justifyContent:"space-between", marginTop:6, fontSize:10, color:C.dim }}>
-                  <span>Operación Normal (Clase 0)</span><span>Todas las Fallas (1–9)</span>
+                  <span>{t.normal_label}</span><span>{t.fault_label}</span>
                 </div>
               </div>
               <div style={{ marginTop:12, padding:"10px 14px", background:C.surface, border:`1px solid ${C.border}`, borderRadius:6 }}>
-                <p style={{ fontSize:11, color:C.muted, margin:0, lineHeight:1.6 }}><strong style={{ color:C.dim }}>Nota sobre desbalance de clases:</strong> Ratio extremo — hasta 1:500 entre la clase más rara y la más frecuente. Abordado mediante conjuntos de evaluación balanceados. Entrenamiento con datos normales exclusivamente para la capa no supervisada.</p>
+                <p style={{ fontSize:11, color:C.muted, margin:0, lineHeight:1.6 }}><strong style={{ color:C.dim }}>{t.imbalance_note_label}</strong> {t.imbalance_note}</p>
               </div>
             </div>
           </div>
         </F>
-        <PF title="Resumen del Dataset" num="02"/>
+        <PF title={t.pf2} num="02"/>
       </Page>
 
-{/* ═══ 03 — TIPOS DE DATOS Y EQUIPAMIENTO ═══ */}
+{/* ═══ 03 — DATA TYPES ═══ */}
       <Page id="s3">
-        <SH num="03" title="Tipos de Datos y Equipamiento" sub="Las 24 señales monitoreadas y su contexto físico"/>
+        <SH num="03" title={t.s3_title} sub={t.s3_sub}/>
         <F>
-          <div style={{ fontSize:14, fontWeight:700, color:C.white, marginBottom:14 }}>Sensores de Proceso Físico</div>
+          <div style={{ fontSize:14, fontWeight:700, color:C.white, marginBottom:14 }}>{t.pres_label}</div>
           <div className="g2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:28 }}>
             <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:18 }}>
-              <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.blue, letterSpacing:".1em", marginBottom:12 }}>PRESIÓN — 10 CANALES</div>
-              {[["P-PDG","Permanent Downhole Gauge"],["P-TPT","Tubing Pressure Transducer"],["P-MON-CKP","Upstream — choke de producción"],["P-JUS-CKP","Downstream — choke de producción"],["P-MON-CKGL","Upstream — choke de gas-lift"],["P-JUS-CKGL","Downstream — choke de gas-lift"],["P-ANULAR","Presión anular"],["P-MON-SDV-P","Upstream — SDV de producción"],["PT-P","Válvula wing de producción"],["P-JUS-BS","Downstream — bomba de servicio"]].map(([c,d],i) =>
+              <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.blue, letterSpacing:".1em", marginBottom:12 }}>{t.pres_title}</div>
+              {t.pres_items.map(([c,d],i) =>
                 <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"4px 0", borderBottom:`1px solid ${C.border}` }}>
                   <code style={{ fontSize:11, fontFamily:C.mono, fontWeight:700, color:C.blue }}>{c}</code>
                   <span style={{ fontSize:11, color:C.dim, textAlign:"right" }}>{d}</span>
@@ -290,8 +608,8 @@ function App() {
             </div>
             <div>
               <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:18, marginBottom:12 }}>
-                <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.amber, letterSpacing:".1em", marginBottom:12 }}>TEMPERATURA — 4 CANALES</div>
-                {[["T-PDG","Downhole Gauge"],["T-TPT","Tubing Pressure Transducer"],["T-MON-CKP","Upstream — choke de producción"],["T-JUS-CKP","Downstream — choke de producción"]].map(([c,d],i) =>
+                <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.amber, letterSpacing:".1em", marginBottom:12 }}>{t.temp_title}</div>
+                {t.temp_items.map(([c,d],i) =>
                   <div key={i} style={{ display:"flex", justifyContent:"space-between", padding:"4px 0", borderBottom:`1px solid ${C.border}` }}>
                     <code style={{ fontSize:11, fontFamily:C.mono, fontWeight:700, color:C.amber }}>{c}</code>
                     <span style={{ fontSize:11, color:C.dim }}>{d}</span>
@@ -299,8 +617,8 @@ function App() {
                 )}
               </div>
               <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:18 }}>
-                <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.green, letterSpacing:".1em", marginBottom:12 }}>CAUDAL — 2 CANALES</div>
-                {[["QGL","Inyección de gas-lift [m³/s]"],["QBS","Caudal de bomba de servicio [m³/s]"]].map(([c,d],i) =>
+                <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.green, letterSpacing:".1em", marginBottom:12 }}>{t.flow_title}</div>
+                {t.flow_items.map(([c,d],i) =>
                   <div key={i} style={{ display:"flex", justifyContent:"space-between", padding:"4px 0", borderBottom:`1px solid ${C.border}` }}>
                     <code style={{ fontSize:11, fontFamily:C.mono, fontWeight:700, color:C.green }}>{c}</code>
                     <span style={{ fontSize:11, color:C.dim }}>{d}</span>
@@ -311,13 +629,9 @@ function App() {
           </div>
         </F>
         <F d={80}>
-          <div style={{ fontSize:14, fontWeight:700, color:C.white, marginBottom:14 }}>Estados de Válvulas y Actuadores</div>
+          <div style={{ fontSize:14, fontWeight:700, color:C.white, marginBottom:14 }}>{t.valves_label}</div>
           <div className="g3" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:28 }}>
-            {[
-              { h:"VÁLVULAS DE SEGURIDAD — 3", items:[["ESTADO-DHSV","Downhole Safety Valve","Cierre no programado → shutdown completo + fuga de gas"],["ESTADO-SDV-P","Production Shutdown Valve","Aísla la línea de flujo de producción"],["ESTADO-SDV-GL","Gas-Lift Shutdown Valve","Corta la línea de inyección de gas"]] },
-              { h:"ÁRBOL DE POZO — 4", items:[["ESTADO-M1","Production Master Valve (PMV)","Aislación primaria de producción"],["ESTADO-M2","Annulus Master Valve (AMV)","Aislación de línea anular"],["ESTADO-W1","Production Wing Valve (PWV)","Rama de producción del árbol"],["ESTADO-W2","Annulus Wing Valve (AWV)","Rama anular del árbol"]] },
-              { h:"APERTURAS DE CHOKE — 2 / CROSSOVER — 2", items:[["ABER-CKP","Production Choke [% abierto]","Control de flujo primario — variable clave de régimen"],["ABER-CKGL","Gas-Lift Choke [% abierto]","Controla el volumen de inyección de gas"],["ESTADO-PXO","Pig Crossover Valve","Operaciones de pigging"],["ESTADO-XO","Crossover Valve","Configuración de ruteo de líneas"]] },
-            ].map((g,gi) =>
+            {t.valve_groups.map((g,gi) =>
               <div key={gi} style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:16 }}>
                 <div style={{ fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.dim, letterSpacing:".06em", marginBottom:10 }}>{g.h}</div>
                 {g.items.map(([code,name,desc],i) =>
@@ -333,45 +647,34 @@ function App() {
         </F>
         <F d={160}>
           <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:22 }}>
-            <div style={{ fontSize:14, fontWeight:700, color:C.white, marginBottom:14 }}>Lógica de Régimen Operativo</div>
+            <div style={{ fontSize:14, fontWeight:700, color:C.white, marginBottom:14 }}>{t.regime_title}</div>
             <div className="g2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:18, fontSize:13, color:C.text, lineHeight:1.65, marginBottom:14 }}>
-              <div><strong style={{ color:C.white }}>¿Qué es un régimen?</strong><br/>Un régimen operativo es la combinación única de estados de válvulas y configuraciones de choke en un momento dado — define qué líneas de flujo están activas, si el gas-lift está en operación, y cómo está configurado el choke.</div>
-              <div><strong style={{ color:C.white }}>¿Por qué importa para la detección?</strong><br/>Los rangos físicos de los sensores difieren significativamente entre regímenes. Una lectura de presión normal bajo producción con gas-lift puede ser anómala durante crossover. Toda normalización es condicional al régimen operativo.</div>
+              <div><strong style={{ color:C.white }}>{t.regime_q1}</strong><br/>{t.regime_a1}</div>
+              <div><strong style={{ color:C.white }}>{t.regime_q2}</strong><br/>{t.regime_a2}</div>
             </div>
             <div style={{ fontSize:12, color:C.text, marginBottom:10, lineHeight:1.6 }}>
-              <strong style={{ color:C.white }}>Construcción:</strong> Las variables ESTADO-* se mapean a enteros (0 = cerrado, 1 = abierto). Las aperturas ABER-* se discretizan a binario o ternario. La cadena concatenada identifica unívocamente el régimen. Regímenes dispersos (&lt;50k muestras) se consolidan en un bucket de Régimen General → ~11 regímenes distintos.
+              <strong style={{ color:C.white }}>{t.regime_build_label}</strong> {t.regime_build}
             </div>
             <div style={{ padding:"8px 14px", background:C.bg, borderRadius:4, fontFamily:C.mono, fontSize:11, color:C.green }}>ESTADO-M1=1, M2=0, ABER-CKP=1, CKGL=0</div>
           </div>
         </F>
-        <PF title="Tipos de Datos y Equipamiento" num="03"/>
+        <PF title={t.pf3} num="03"/>
       </Page>
 
-{/* ═══ 04 — CLASIFICACIÓN DE FALLAS ═══ */}
+{/* ═══ 04 — FAULT CLASSIFICATION ═══ */}
       <Page id="s4">
-        <SH num="04" title="Clasificación de Fallas" sub="9 clases de anomalías — causa, proporción y severidad"/>
+        <SH num="04" title={t.s4_title} sub={t.s4_sub}/>
         <F>
           <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, overflowX:"auto", marginBottom:28 }}>
             <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
               <thead><tr style={{ borderBottom:`1px solid ${C.border2}` }}>
-                {["#","Tipo de Falla","","% Tiempo","Sev."].map((h,i) => <th key={i} style={{ padding:"10px 14px", textAlign:"left", fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.muted, letterSpacing:".06em" }}>{h}</th>)}
+                {t.table_heads.map((h,i) => <th key={i} style={{ padding:"10px 14px", textAlign:"left", fontSize:10, fontWeight:700, fontFamily:C.mono, color:C.muted, letterSpacing:".06em" }}>{h}</th>)}
               </tr></thead>
               <tbody>
-                {[
-                  [0,"Operación Normal","12,158,183","37.0%","—"],
-                  [7,"Incrustación en PCK","7,864,945","23.9%","High"],
-                  [8,"Hidrato — Línea de Producción","4,809,035","14.6%","Crit"],
-                  [4,"Inestabilidad de Flujo","3,689,683","11.2%","Med"],
-                  [9,"Hidrato — Línea de Servicio","2,635,372","8.0%","High"],
-                  [3,"Slugging Severo","684,352","2.1%","Crit"],
-                  [5,"Pérdida Rápida de Productividad","439,408","1.3%","High"],
-                  [2,"Cierre Espurio de DHSV","277,001","0.8%","Crit"],
-                  [1,"Incremento Abrupto de BSW","236,794","0.7%","Med"],
-                  [6,"Restricción Rápida de PCK","77,477","0.2%","Med"],
-                ].map(([n,name,rows,pct,sev],i) =>
+                {t.fault_rows.map(([n,name,rows,pct,sev],i) =>
                   <tr key={i} style={{ borderBottom:`1px solid ${C.border}`, background:i===0?C.greenDim:"transparent" }}>
                     <td style={{ padding:"9px 14px", fontFamily:C.mono, fontWeight:700, color:i===0?C.green:C.muted, fontSize:11 }}>{n}</td>
-                    <td style={{ padding:"9px 14px" }}><span style={{ color:C.white, fontWeight:600, fontSize:13 }}>{name}</span><br/><span style={{ fontSize:10, fontFamily:C.mono, color:C.muted }}>{rows} filas</span></td>
+                    <td style={{ padding:"9px 14px" }}><span style={{ color:C.white, fontWeight:600, fontSize:13 }}>{name}</span><br/><span style={{ fontSize:10, fontFamily:C.mono, color:C.muted }}>{rows} {t.fault_rows_suffix}</span></td>
                     <td style={{ padding:"9px 14px", width:70 }}><div style={{ width:55, height:5, background:C.border, borderRadius:3, overflow:"hidden" }}><div style={{ width:`${Math.min(parseFloat(pct)*2.7,100)}%`, height:"100%", background:i===0?C.green:C.red, borderRadius:3 }}/></div></td>
                     <td style={{ padding:"9px 14px", fontFamily:C.mono, fontSize:11, color:C.text }}>{pct}</td>
                     <td style={{ padding:"9px 14px" }}>{sev==="—"?<span style={{ color:C.muted }}>—</span>:<Sev l={sev}/>}</td>
@@ -382,75 +685,55 @@ function App() {
           </div>
         </F>
         <F d={80}>
-          <div style={{ fontSize:14, fontWeight:700, color:C.white, marginBottom:12 }}>Descripción de Fallas</div>
+          <div style={{ fontSize:14, fontWeight:700, color:C.white, marginBottom:12 }}>{t.fault_desc_title}</div>
           <div className="g2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-            {[
-              ["7 — Incrustación en PCK","Depósitos minerales estrechan progresivamente el bore del choke. El caudal disminuye gradualmente — pasa desapercibido durante semanas sin monitoreo.",C.amber],
-              ["8 — Hidrato — Línea de Producción","Cristales de gas/agua bloquean la línea de flujo. Pérdida total de producción; la limpieza requiere blowdown con fuga de gas asociada.",C.red],
-              ["4 — Inestabilidad de Flujo","Flujo multifásico irregular. Reduce eficiencia; precursor conocido de eventos de slugging severo.",C.blue],
-              ["3 — Slugging Severo","Oscilaciones periódicas de presión en el riser. Disparo de equipos y desgaste mecánico acelerado.",C.red],
-              ["2 — Cierre Espurio de DHSV","Válvula de seguridad cierra sin comando. Shutdown completo; requiere despresurización controlada con fuga de gas.",C.red],
-              ["5 — Pérdida Rápida de Productividad","El pozo produce por debajo de lo esperado sin cambios en el choke. Indica cambio en el reservorio o restricción interna.",C.amber],
-              ["1 — Incremento Abrupto de BSW","Aumento súbito en la fracción de agua/sedimento. Degrada la calidad del fluido; precursor de daño.",C.blue],
-              ["6 — Restricción Rápida de PCK","Cierre abrupto del choke genera transitorios fuertes de presión y flujo en todo el sistema.",C.blue],
-            ].map(([t,d,c],i) =>
+            {t.fault_descs.map(([title,desc],i) =>
               <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:6, padding:14 }}>
-                <div style={{ fontSize:11, fontWeight:700, fontFamily:C.mono, color:c, marginBottom:4 }}>{t}</div>
-                <p style={{ fontSize:12, color:C.dim, margin:0, lineHeight:1.55 }}>{d}</p>
+                <div style={{ fontSize:11, fontWeight:700, fontFamily:C.mono, color:faultDescColors[i], marginBottom:4 }}>{title}</div>
+                <p style={{ fontSize:12, color:C.dim, margin:0, lineHeight:1.55 }}>{desc}</p>
               </div>
             )}
           </div>
         </F>
-        <PF title="Clasificación de Fallas — Clases 0–9" num="04"/>
+        <PF title={t.pf4} num="04"/>
       </Page>
 
-{/* ═══ 05 — METODOLOGÍA DE PROCESAMIENTO ═══ */}
+{/* ═══ 05 — PROCESSING METHODOLOGY ═══ */}
       <Page id="s5">
-        <SH num="05" title="Metodología de Procesamiento" sub="De telemetría SCADA cruda a señal de anomalía"/>
-        {[
-          {n:"01",t:"Ingestión Temporal y Split",d:"Orden cronológico mantenido en todo el pipeline. Split estricto train / val / test / holdout sin fuga de datos. El entrenamiento utiliza únicamente datos normales. Los conjuntos de validación y test están balanceados 50/50 entre todas las clases de fallas para evaluación imparcial.",tags:["Zero leakage","Orden cronológico"],c:C.blue},
-          {n:"02",t:"Clasificación de Régimen",d:"Los estados de válvulas (ESTADO-*) y aperturas de choke (ABER-*) se discretizan y concatenan en un string de régimen por observación. Regímenes con menos de 50,000 muestras se consolidan en un bucket de Régimen General, resultando en aproximadamente 11 regímenes distintos.",tags:["ESTADO-* + ABER-*","~11 regímenes finales"],c:C.green},
-          {n:"03",t:"Manejo de NaN",d:"Forward-fill seguido de backward-fill por canal. Variables de régimen rellenadas con moda o cero. Variables de sensores físicos imputadas usando medianas por régimen del set de entrenamiento. Las variables de régimen y operativas se tratan de forma completamente independiente.",tags:["Forward / backward fill","Imputación por régimen"],c:C.amber},
-          {n:"04",t:"Normalización Condicionada por Régimen",d:"Sensores físicos normalizados como (x − μᵣ) / σᵣ, con estadísticas computadas exclusivamente desde observaciones normales de entrenamiento dentro de cada régimen. Fallback global para regímenes dispersos. Las variables de régimen (estados discretos, aperturas) nunca se normalizan.",tags:["μ/σ desde train-normal","Régimen-condicional"],c:C.blue},
-          {n:"05",t:"Escalado MinMax + Capping de Outliers",d:"Sensores físicos escalados a [0, 1] usando MinMaxScaler ajustado únicamente sobre datos de entrenamiento. Valores limitados al percentil 1–99 de entrenamiento, suprimiendo transitorios extremos que de otro modo inflarían los scores de anomalía.",tags:["Fit solo en train","Percentil 1st–99th"],c:C.green},
-          {n:"06",t:"Ingeniería de Features",d:"Features derivados computados después de toda la normalización: tasa de cambio por canal (delta), diferenciales de presión cross-sensor, y estadísticas de ventana deslizante. Aplicados únicamente a variables operativas validadas sin valores NaN remanentes.",tags:["Deltas","Ratios de presión","Rolling stats"],c:C.amber},
-        ].map((s,i) =>
+        <SH num="05" title={t.s5_title} sub={t.s5_sub}/>
+        {t.processing_steps.map((s,i) =>
           <F key={i} d={i*70}>
             <div style={{ display:"grid", gridTemplateColumns:"46px 1fr", gap:14, marginBottom:24 }}>
-              <div style={{ width:46, height:46, borderRadius:8, background:s.c+"12", border:`1px solid ${s.c}28`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, fontWeight:800, fontFamily:C.mono, color:s.c }}>{s.n}</div>
+              <div style={{ width:46, height:46, borderRadius:8, background:stepColors[i]+"12", border:`1px solid ${stepColors[i]}28`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, fontWeight:800, fontFamily:C.mono, color:stepColors[i] }}>{s.n}</div>
               <div>
                 <h4 style={{ fontSize:14, fontWeight:700, color:C.white, margin:"0 0 6px" }}>{s.t}</h4>
                 <p style={{ fontSize:12, color:C.text, margin:"0 0 8px", lineHeight:1.6 }}>{s.d}</p>
-                <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>{s.tags.map((t,j) => <Tag key={j} color={s.c}>{t}</Tag>)}</div>
+                <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>{s.tags.map((tag,j) => <Tag key={j} color={stepColors[i]}>{tag}</Tag>)}</div>
               </div>
             </div>
           </F>
         )}
-        <PF title="Pipeline de Procesamiento de Datos" num="05"/>
+        <PF title={t.pf5} num="05"/>
       </Page>
 
-{/* ═══ 06 — ARQUITECTURA DE DETECCIÓN ═══ */}
+{/* ═══ 06 — DETECTION ARCHITECTURE ═══ */}
       <Page id="s6">
-        <SH num="06" title="Arquitectura de Detección" sub="Cascada de tres capas — detección desacoplada de clasificación"/>
+        <SH num="06" title={t.s6_title} sub={t.s6_sub}/>
         <F>
           <p style={{ fontSize:13, color:C.text, lineHeight:1.75, marginBottom:28 }}>
-            El sistema separa la <strong style={{ color:C.white }}>detección</strong> de anomalías de la <strong style={{ color:C.white }}>anotación</strong> de fallas por diseño. La detección (Capas 1–2) no requiere datos etiquetados de fallas y puede desplegarse inmediatamente con cualquier operador. La anotación (Capa 3) es una capa de enriquecimiento opcional que mejora progresivamente a medida que se acumula historial de fallas etiquetadas.
+            {t.s6_intro[0]}<strong style={{ color:C.white }}>{t.s6_intro[1]}</strong>{t.s6_intro[2]}<strong style={{ color:C.white }}>{t.s6_intro[3]}</strong>{t.s6_intro[4]}
           </p>
         </F>
         <F d={80}>
           <div className="g3" style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginBottom:28 }}>
-            {[
-              { n:"01", l:"Detectar", sub:"Estadístico + Isolation Forest", q:"Identificar lo que no se ve normal", c:C.green, rows:[["DATOS REQ.","Solo operación normal"],["OUTPUT","Anomaly score [0 → 1]"],["UMBRAL","Calibrado en set de validación"],["BENEFICIO","Cero etiquetas de falla necesarias"]] },
-              { n:"02", l:"Clasificar", sub:"Anotación Supervisada", q:"Nombrar el tipo de falla", c:C.blue, rows:[["DATOS REQ.","Incidentes históricos etiquetados"],["OUTPUT","Clase de falla + confianza"],["MODELOS","Decision Tree + Log. Regression"],["BENEFICIO","Mejora con el tiempo"]] },
-              { n:"03", l:"Alertar", sub:"Notificación al Operador", q:"La información correcta, en el momento correcto", c:C.amber, rows:[["CONTENIDO","Clase + severidad + canales"],["TIMING","Ventana de intervención next-day"],["INTEGRACIÓN","SCADA / OPC-UA / REST API"],["BENEFICIO","Sin fatiga de alarmas"]] },
-            ].map((ly,i) =>
+            {t.layers.map((ly,i) =>
               <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:20 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12 }}>
-                  <span style={{ fontSize:10, fontWeight:800, fontFamily:C.mono, padding:"2px 7px", borderRadius:3, background:ly.c+"16", color:ly.c, border:`1px solid ${ly.c}28` }}>CAPA {ly.n}</span>
+                  <span style={{ fontSize:10, fontWeight:800, fontFamily:C.mono, padding:"2px 7px", borderRadius:3, background:layerColors[i]+"16", color:layerColors[i], border:`1px solid ${layerColors[i]}28` }}>{t.layer_label} {ly.n}</span>
                   <span style={{ fontSize:15, fontWeight:700, color:C.white }}>{ly.l}</span>
                 </div>
                 <div style={{ fontSize:12, fontWeight:600, color:C.dim, marginBottom:4 }}>{ly.sub}</div>
-                <div style={{ fontSize:11, color:ly.c, fontStyle:"italic", marginBottom:14, lineHeight:1.5 }}>"{ly.q}"</div>
+                <div style={{ fontSize:11, color:layerColors[i], fontStyle:"italic", marginBottom:14, lineHeight:1.5 }}>"{ly.q}"</div>
                 {ly.rows.map(([k,v],j) =>
                   <div key={j} style={{ display:"flex", justifyContent:"space-between", padding:"5px 0", borderBottom:`1px solid ${C.border}` }}>
                     <span style={{ fontSize:10, fontFamily:C.mono, color:C.muted }}>{k}</span>
@@ -464,7 +747,7 @@ function App() {
         <F d={160}>
           <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, padding:"14px 18px", overflowX:"auto" }}>
             <div className="gflow" style={{ display:"flex", alignItems:"center", gap:5, justifyContent:"center", flexWrap:"nowrap", minWidth:600 }}>
-              {["Datos SCADA","Clasif. Régimen","L1 Filtro Estadístico","L2 Isolation Forest","L3 Anotación Supervisada","Alerta al Operador"].map((s,i) =>
+              {t.flow_nodes.map((s,i) =>
                 <div key={i} style={{ display:"flex", alignItems:"center", gap:5 }}>
                   <div style={{ padding:"6px 11px", borderRadius:4, fontSize:10, fontWeight:600, fontFamily:C.mono, whiteSpace:"nowrap", background:i===0||i===5?C.green+"16":C.card, color:i===0||i===5?C.green:C.text, border:`1px solid ${i===0||i===5?C.green+"30":C.border}` }}>{s}</div>
                   {i<5 && <span style={{ color:C.faint, fontSize:11 }}>→</span>}
@@ -473,39 +756,33 @@ function App() {
             </div>
           </div>
         </F>
-        <PF title="Arquitectura de Detección en Cascada" num="06"/>
+        <PF title={t.pf6} num="06"/>
       </Page>
 
-{/* ═══ 07 — RESULTADOS VALIDADOS ═══ */}
+{/* ═══ 07 — RESULTS ═══ */}
       <Page id="s7">
-        <SH num="07" title="Resultados Validados" sub="Impacto estimado a partir de la distribución de fallas observada"/>
+        <SH num="07" title={t.s7_title} sub={t.s7_sub}/>
         <F>
           <div className="g2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20, marginBottom:28 }}>
             <div style={{ background:C.outBg, border:`1px solid ${C.green}20`, borderRadius:8, padding:28, textAlign:"center" }}>
-              <div className="gmetric" style={{ fontSize:38, fontWeight:800, fontFamily:C.mono, color:C.green, marginBottom:6 }}>$8M/año</div>
-              <div style={{ fontSize:15, fontWeight:700, color:C.white }}>Valor de producción recuperada</div>
+              <div className="gmetric" style={{ fontSize:38, fontWeight:800, fontFamily:C.mono, color:C.green, marginBottom:6 }}>{t.s7_metric1}</div>
+              <div style={{ fontSize:15, fontWeight:700, color:C.white }}>{t.s7_label1}</div>
             </div>
             <div style={{ background:C.outBg, border:`1px solid ${C.blue}20`, borderRadius:8, padding:28, textAlign:"center" }}>
-              <div className="gmetric" style={{ fontSize:38, fontWeight:800, fontFamily:C.mono, color:C.blue, marginBottom:6 }}>146t CH₄</div>
-              <div style={{ fontSize:15, fontWeight:700, color:C.white }}>Emisiones de metano evitadas por año</div>
+              <div className="gmetric" style={{ fontSize:38, fontWeight:800, fontFamily:C.mono, color:C.blue, marginBottom:6 }}>{t.s7_metric2}</div>
+              <div style={{ fontSize:15, fontWeight:700, color:C.white }}>{t.s7_label2}</div>
             </div>
           </div>
         </F>
         <F d={80}>
           <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, overflowX:"auto" }}>
-            <div style={{ padding:"12px 18px", borderBottom:`1px solid ${C.border}` }}><span style={{ fontSize:13, fontWeight:700, color:C.white }}>Desglose de impacto por tipo de falla</span></div>
+            <div style={{ padding:"12px 18px", borderBottom:`1px solid ${C.border}` }}><span style={{ fontSize:13, fontWeight:700, color:C.white }}>{t.impact_table_title}</span></div>
             <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
               <thead><tr style={{ borderBottom:`1px solid ${C.border2}` }}>
-                {["Tipo de Falla","% Tiempo","Mecanismo de Pérdida Principal","Valor Est.","CH₄","Sev."].map((h,i) => <th key={i} style={{ padding:"8px 12px", textAlign:"left", fontSize:9, fontWeight:700, fontFamily:C.mono, color:C.muted }}>{h}</th>)}
+                {t.impact_heads.map((h,i) => <th key={i} style={{ padding:"8px 12px", textAlign:"left", fontSize:9, fontWeight:700, fontFamily:C.mono, color:C.muted }}>{h}</th>)}
               </tr></thead>
               <tbody>
-                {[
-                  ["Incrustación en PCK","23.93%","Pérdida gradual de caudal por estrechamiento progresivo del choke","$4.2M","Low","High"],
-                  ["Hidrato — Línea Prod.","14.63%","Bloqueo total; pérdida de producción + fuga de gas por blowdown","$2.1M + 82t","Crit","Crit"],
-                  ["Inestabilidad de Flujo","11.22%","Degradación de eficiencia y desgaste acelerado de equipos","$0.9M","Low","Med"],
-                  ["Hidrato — Línea Serv.","8.02%","Impacto indirecto: operaciones de inyección y soporte interrumpidas","$0.4M + 38t","High","High"],
-                  ["Cierre Espurio DHSV","0.84%","Shut-in no planificado; despresurización con fuga de gas","$0.3M + 26t","Crit","Crit"],
-                ].map((r,i) =>
+                {t.impact_rows.map((r,i) =>
                   <tr key={i} style={{ borderBottom:`1px solid ${C.border}` }}>
                     <td style={{ padding:"8px 12px", color:C.white, fontWeight:600 }}>{r[0]}</td>
                     <td style={{ padding:"8px 12px", fontFamily:C.mono, color:C.text }}>{r[1]}</td>
@@ -519,54 +796,17 @@ function App() {
             </table>
           </div>
         </F>
-        <PF title="Resultados — Impacto Económico y de Emisiones" num="07"/>
+        <PF title={t.pf7} num="07"/>
       </Page>
 
-{/* ═══ 08 — PREGUNTAS FRECUENTES ═══ */}
+{/* ═══ 08 — FAQ ═══ */}
       <Page id="s8">
-        <SH num="08" title="Preguntas Frecuentes" sub="Respuestas anticipadas a las consultas técnicas y operativas más relevantes"/>
-
-        {[
-          {
-            q: "¿Cómo tienen que venir los datos?",
-            a: "Series temporales en formato tabular (CSV, Parquet o exportación directa del historian SCADA). Cada fila = timestamp + lecturas de sensores. No necesitan estar limpios — nuestro pipeline maneja NaN, congelamiento de señales y gaps temporales de forma nativa. Mínimo requerido: timestamp + presión + temperatura + caudal.",
-            color: C.blue
-          },
-          {
-            q: "¿Qué tanta información de la operación necesitan?",
-            a: "Para la primera corrida: datos SCADA crudos + listado de qué mide cada tag. El sistema aprende el comportamiento normal directamente de los datos. Info adicional (tipo de válvulas, árbol de pozo) mejora la clasificación de régimen pero no es excluyente. Además, complementamos con investigación propia en papers técnicos sobre los tipos de fallas específicos.",
-            color: C.green
-          },
-          {
-            q: "¿Cómo se relaciona el caso de Petrobras con otras operaciones?",
-            a: "Las variables físicas (presión, temperatura, caudal) y los tipos de fallas (hidratos, incrustaciones, slugging, DHSV) son universales en O&G. El caso de Petrobras valida la metodología — no se transfiere el modelo. El sistema se reentrena completamente con datos de cada operador, generando un modelo específico para cada caso.",
-            color: C.amber
-          },
-          {
-            q: "¿Cómo calcularon los $8M y las 146t de CH₄? ¿Cuánto representa de la operación total?",
-            a: "$8M: distribución de fallas observada × tasas de pérdida de producción publicadas × $75/bbl con supuesto de intervención en 24hrs. 146t CH₄: eventos que requieren blowdown (hidratos + DHSV) con liberación de gas. Son una ilustración de orden de magnitud para un cluster offshore. Un piloto cuantificaría el impacto real para la escala específica de cada operador.",
-            color: C.green
-          },
-          {
-            q: "¿Qué tan grande es la operación analizada?",
-            a: "32.8M de observaciones a intervalos de 1 minuto, 24 canales de sensores, 1,119 instancias reales etiquetadas, 9 tipos de fallas confirmadas. Es una de las bases de datos públicas más completas y citadas (100+ publicaciones académicas) para detección de anomalías en producción de petróleo y gas.",
-            color: C.blue
-          },
-          {
-            q: "¿Qué tanto necesitan saber de la operación para correr los algoritmos?",
-            a: "Muy poco al inicio. La Capa 1 (detección) es no supervisada — aprende qué es 'normal' directamente de los datos. Lo primero que hacemos es un pre-análisis automático que identifica qué sensores reaccionan ante cada tipo de anomalía. Lo que sí necesitamos es que un experto valide los hallazgos: cuando el sistema detecta algo, el SME confirma si es real. Esa retroalimentación mejora la clasificación progresivamente.",
-            color: C.amber
-          },
-          {
-            q: "¿Cómo y quién clasificó los tipos de fallas?",
-            a: "Clasificadas por ingenieros de operaciones y expertos en integridad de pozos de Petrobras, basándose en reportes de incidentes confirmados. Taxonomía documentada en publicaciones peer-reviewed (Journal of Petroleum Science and Engineering, 2019). Para cada nuevo operador, la clasificación se construye en conjunto con el equipo técnico a partir de sus propios registros.",
-            color: C.green
-          },
-        ].map((item, i) =>
+        <SH num="08" title={t.s8_title} sub={t.s8_sub}/>
+        {t.faqs.map((item,i) =>
           <F key={i} d={i * 50}>
             <div style={{ marginBottom: 16, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: "20px 24px" }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 6, background: item.color + "12", border: `1px solid ${item.color}28`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, fontFamily: C.mono, color: item.color, flexShrink: 0, marginTop: 2 }}>{"0" + (i + 1)}</div>
+                <div style={{ width: 28, height: 28, borderRadius: 6, background: faqColors[i] + "12", border: `1px solid ${faqColors[i]}28`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, fontFamily: C.mono, color: faqColors[i], flexShrink: 0, marginTop: 2 }}>{"0" + (i + 1)}</div>
                 <div style={{ flex: 1 }}>
                   <h4 style={{ fontSize: 14, fontWeight: 700, color: C.white, margin: "0 0 8px", lineHeight: 1.4 }}>{item.q}</h4>
                   <p style={{ fontSize: 12, color: C.text, margin: 0, lineHeight: 1.7 }}>{item.a}</p>
@@ -575,31 +815,32 @@ function App() {
             </div>
           </F>
         )}
-        <PF title="Preguntas Frecuentes" num="08"/>
+        <PF title={t.pf8} num="08"/>
       </Page>
 
 {/* ═══ FOOTER ═══ */}
       <footer style={{ borderTop:`1px solid ${C.border}`, padding:"44px 24px", background:C.page }}>
         <div style={{ maxWidth:880, margin:"0 auto", textAlign:"center" }}>
           <div style={{ fontSize:18, fontWeight:800, fontFamily:C.mono, color:C.green, letterSpacing:".06em", marginBottom:4 }}>VÖRNTEC</div>
-          <div style={{ fontSize:12, color:C.dim, marginBottom:28 }}>Detección de Fugas de Gas mediante IA</div>
+          <div style={{ fontSize:12, color:C.dim, marginBottom:28 }}>{t.footer_sub}</div>
           <div style={{ display:"flex", justifyContent:"center", gap:28, marginBottom:28 }}>
-            {[["32.8M","Observaciones"],["9","Clases de Fallas"],["$8M","Recuperable /año"],["146t","CH₄ Evitado"]].map(([v,l],i) =>
+            {t.footer_stats.map(([v,l],i) =>
               <div key={i}><div style={{ fontSize:16, fontWeight:800, fontFamily:C.mono, color:C.green }}>{v}</div><div style={{ fontSize:10, color:C.muted }}>{l}</div></div>
             )}
           </div>
           <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:20, marginBottom:20 }}>
-            <div style={{ fontSize:9, fontWeight:700, fontFamily:C.mono, color:C.faint, letterSpacing:".12em", marginBottom:14 }}>RESPALDO Y ECOSISTEMA</div>
+            <div style={{ fontSize:9, fontWeight:700, fontFamily:C.mono, color:C.faint, letterSpacing:".12em", marginBottom:14 }}>{t.footer_ecosystem}</div>
             <div style={{ display:"flex", justifyContent:"center", gap:16 }}>
               <Logo name="bgv.png" w={90} h={28} light/>
               <Logo name="ignite.png" w={90} h={28} light/>
               <Logo name="nvidia.png" w={120} h={28} light/>
             </div>
           </div>
-          <div style={{ fontSize:10, color:C.faint }}>Confidencial — para uso exclusivo de inversores y clientes</div>
+          <div style={{ fontSize:10, color:C.faint }}>{t.footer_conf}</div>
         </div>
       </footer>
     </div>
+    </LangCtx.Provider>
   );
 }
 
